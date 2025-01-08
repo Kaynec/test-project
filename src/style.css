@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0deg 40% 96.08%);
+  --primary: hsl(0deg 0% 24.71%);
+  --accent: rgb(213 130 94);
+}
