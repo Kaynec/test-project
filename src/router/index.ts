@@ -51,9 +51,10 @@ router.beforeEach((to, from) => {
   if (needsAuth && !haveAuth) {
     // User is not authenticated but the route requires authentication
     // Redirect to login
-    if (to.path !== from.path) {
+    if (to.path !== "/login") {
       return "/login";
     }
+    return true;
   }
 });
 

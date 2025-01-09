@@ -6,8 +6,9 @@
       <p class="text-primary-text">
         برای ورود ایمیل و رمز عبور خودرا وارد کنید
       </p>
-      <form @submit.prevent="signup">
+      <form @submit.prevent="signup" class="space-y-4">
         <TextField
+          type="email"
           placeholder="ایمیل شما"
           v-model="body.email"
           v-model:error="errors.email"
@@ -91,7 +92,9 @@
             </button>
           </template>
         </TextField>
-        <Button class="my-2 w-full" type="submit"> ورود </Button>
+        <Button :loading="isLoading" class="my-2 w-full" type="submit">
+          ورود
+        </Button>
       </form>
     </Card>
   </main>
@@ -106,6 +109,7 @@ import TextField from "../components/TextField.vue";
 import Card from "../components/Card.vue";
 
 import { useFetch } from "../api/index";
+import { useRouter } from "vue-router";
 
 const store = useGlobalState();
 
@@ -120,7 +124,11 @@ const errors = ref({
   password: "",
 });
 
+const isLoading = ref(false);
+
+const router = useRouter();
 async function signup() {
+  console.log(body.value);
   if (!body.value.email.length) {
     errors.value.email = "لطفا ایمیل خود را وارد کنید";
     return;
@@ -136,11 +144,16 @@ async function signup() {
     return;
   }
   // else if password regex not good
+
+  isLoading.value = true;
+
   const { error, data } = await useFetch<SignupResponseBody>(
     "/main/main/signup"
   )
     .post(body)
     .json();
+
+  isLoading.value = false;
 
   if (error.value) {
     errors.value.email = error.value;
@@ -150,5 +163,7 @@ async function signup() {
   if (!data.value?.ok || !data.value.data.access) return;
   store.setAccessToken(data.value.data?.access);
   store.setRefreshToken(data.value.data?.refresh);
+
+  router.replace("/");
 }
 </script>

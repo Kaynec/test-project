@@ -20,7 +20,7 @@ export type RefreshResponseBody = string; // Based on the Swagger spec
 
 // Form
 export type SubmitFormRequestBody = {
-  form_type: "public" | "private" | null;
+  form_type: "public" | "private" | "choose";
   form_title: string;
   description: string;
   sections: {
