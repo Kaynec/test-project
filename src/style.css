@@ -2,8 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+/* for most projects google fonts is the best choice */
+
+@font-face {
+  font-family: VazirMatn;
+  src: url("./assets/fonts/Vazirmatn-Regular.ttf");
+  font-weight: normal;
+}
+@font-face {
+  font-family: VazirMatn;
+  src: url("./assets/fonts/Vazirmatn-Bold.ttf");
+  font-weight: bold;
+}
+
 :root {
   --background: hsl(0deg 40% 96.08%);
   --primary: hsl(0deg 0% 24.71%);
+  --secondary: hsl(216, 55%, 66%);
+  --primary-text: hsl(0deg 0% 55.71%);
   --accent: rgb(213 130 94);
+}
+
+html {
+  font-family: Vazirmatn, serif;
+}
+body {
+  direction: rtl;
 }

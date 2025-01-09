@@ -1,9 +1,12 @@
 import { createFetch } from "@vueuse/core";
-const useFetch = createFetch({
+export const useFetch = createFetch({
   baseUrl: "https://interview.cetri.ir",
   options: {
     async beforeFetch({ options }) {
-      const myToken = "token";
+      const myToken = localStorage.getItem("token");
+      if (!myToken) {
+        return;
+      }
       if (options.headers) {
         (options.headers as any)["Authorization"] = `Bearer ${myToken}`;
       }

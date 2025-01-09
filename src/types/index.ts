@@ -4,7 +4,14 @@ export type SignupRequestBody = {
   password: string;
 };
 
-export type SignupResponseBody = string; // Based on the Swagger spec
+export type SignupResponseBody = {
+  data: {
+    access: string;
+    refresh: string;
+  };
+  status: number;
+  ok: string;
+}; // Based on the Swagger spec
 
 // Refresh
 export type RefreshRequestBody = undefined; // No request body
