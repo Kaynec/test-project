@@ -22,9 +22,13 @@
     </div>
 
     <Card>
-      <div class="flex items-center justify-center gap-4">
+      <div
+        class="h-[85svh] max-h-[45rem] flex items-center justify-center gap-4"
+      >
         <p class="text-primary-text">تا به حال فرمی ساخته نشده است!</p>
-        <Button variant="simple"> ایجاد فرم </Button>
+        <RouterLink to="/form">
+          <Button variant="simple"> ایجاد فرم </Button>
+        </RouterLink>
       </div>
     </Card>
   </main>
