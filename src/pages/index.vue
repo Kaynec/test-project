@@ -1,5 +1,7 @@
 <template>
   <main class="w-[90vw] max-w-[90rem] space-y-4">
+    {{ error }}
+
     <div class="flex justify-between">
       <span class="font-bold text-xl">فرم ها</span>
       <Button>
@@ -34,6 +36,9 @@
   </main>
 </template>
 <script setup lang="ts">
+import { useFetch } from "@/api";
 import Button from "../components/Button.vue";
 import Card from "../components/Card.vue";
+
+const { error, data } = useFetch(`https://interview.cetri.ir/main/main/forms`);
 </script>

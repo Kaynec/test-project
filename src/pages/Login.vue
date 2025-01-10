@@ -160,6 +160,7 @@ async function signup() {
     return;
   }
 
+  console.log(data.value);
   if (!data.value?.ok || !data.value.data.access) return;
   store.setAccessToken(data.value.data?.access);
   store.setRefreshToken(data.value.data?.refresh);
