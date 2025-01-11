@@ -19,16 +19,19 @@ export type RefreshRequestBody = undefined; // No request body
 export type RefreshResponseBody = string; // Based on the Swagger spec
 
 // Form
+
+export type Section = {
+  title: string;
+  type: string;
+  required: boolean;
+  properties?: any[];
+};
+
 export type SubmitFormRequestBody = {
   form_type: "public" | "private" | "choose";
   form_title: string;
   description: string;
-  sections: {
-    title: string;
-    type: string;
-    required: boolean;
-    properties: Record<string, unknown>[];
-  }[];
+  sections: Section[];
 };
 
 export type SubmitFormResponseBody = string; // Based on the Swagger spec
@@ -60,4 +63,17 @@ export type ErrorResponse = {
     msg: string;
     type: string;
   }[];
+};
+
+export type SectionError = {
+  title: string;
+  type: string;
+  properties: string[];
+};
+
+export type FormError = {
+  form_title: string;
+  description: string;
+  form_type: string;
+  sections: SectionError[];
 };

@@ -9,22 +9,25 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@formkit/auto-animate": "^0.8.2",
+    "@heroicons/vue": "^2.2.0",
+    "notiwind": "^2.1.0",
     "vue": "latest"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "latest",
+    "@vue/compiler-sfc": "latest",
     "@vue/tsconfig": "^0.7.0",
     "@vueuse/core": "^12.3.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
-    "vue-router": "^4.5.0",
-    "@vitejs/plugin-vue": "latest",
-    "@vue/compiler-sfc": "latest",
     "typescript": "latest",
     "vite": "latest",
     "vite-plugin-inspect": "latest",
     "vite-plugin-vue-component-preview": "latest",
     "volar-service-prettyhtml": "latest",
+    "vue-router": "^4.5.0",
     "vue-tsc": "latest"
   }
 }

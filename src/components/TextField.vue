@@ -1,7 +1,7 @@
 <template>
   <div class="relative">
-    <label class="">
-      {{ label }}
+    <label :class="{ invisible: !label }" class="mt-4 h-12 w-24">
+      {{ label ? label : "placeholderlabel" }}
     </label>
     <div class="relative">
       <div @click="" class="absolute top-1/2 -translate-y-1/2 left-0 pl-2">

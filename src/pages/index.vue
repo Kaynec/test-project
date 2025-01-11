@@ -1,24 +1,13 @@
 <template>
   <main class="w-[90vw] max-w-[90rem] space-y-4">
     {{ error }}
+    {{ data }}
+    {{ isFetching }}
 
     <div class="flex justify-between">
       <span class="font-bold text-xl">فرم ها</span>
       <Button>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          class="size-6"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 4.5v15m7.5-7.5h-15"
-          />
-        </svg>
+        <PlusIcon class="size-6" />
         <span> ایجاد فرم </span>
       </Button>
     </div>
@@ -36,9 +25,11 @@
   </main>
 </template>
 <script setup lang="ts">
-import { useFetch } from "@/api";
+import { setNewToken, useFetch } from "@/api";
 import Button from "../components/Button.vue";
 import Card from "../components/Card.vue";
+import { PlusIcon } from "@heroicons/vue/24/solid";
 
-const { error, data } = useFetch(`https://interview.cetri.ir/main/main/forms`);
+const { error, data, isFetching } = useFetch(`/main/main/forms`);
+setNewToken();
 </script>

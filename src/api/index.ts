@@ -1,118 +1,154 @@
-import { SignupResponseBody } from "@/types";
-import { AfterFetchContext, BeforeFetchContext } from "@vueuse/core";
 import { ref } from "vue";
 
-let isRefreshing = false; // Flag to track if a refresh request is in progress
+const baseUrl = "https://interview.cetri.ir";
 
-async function setNewToken(): Promise<string> {
+let shouldRefresh = true; // Flag to notify on error
+
+export async function setNewToken(): Promise<string> {
   return new Promise(async (resolve, reject) => {
     const refreshToken = localStorage.getItem("refreshToken");
 
     if (!refreshToken) {
       // If there is no refresh token, redirect to login
-      window.location.href = "/login";
+      // window.location.href = "/login";
       reject("No refresh token found");
       return;
     }
 
     // Use the custom useFetch to refresh the token
-    const { data, error } = await useFetch<SignupResponseBody>(
-      `https://interview.cetri.ir/main/main/refresh?token=${refreshToken}`,
-      {
-        method: "POST",
-      }
-    );
-
-    if (error.value || !data.value) {
-      console.error("Error refreshing token:", error.value);
+    try {
+      const res = await fetch(
+        `${baseUrl}/main/main/refresh?token=${refreshToken}`,
+        {
+          method: "POST",
+        }
+      );
+      const data = await res.json();
+      // Store the new token in local storage
+      localStorage.setItem("accessToken", data.data.access);
+      resolve(data.data.access);
+    } catch (error) {
+      console.error("Error refreshing token:", error);
 
       // If refreshing fails, clear tokens and redirect to login
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
-      window.location.href = "/login";
+      // window.location.href = "/login";
       reject("Unable to get a new token");
       return;
     }
-
-    // Store the new token in local storage
-    localStorage.setItem("accessToken", data.value.data.access);
-    resolve(data.value.data.access);
   });
 }
 
-export function useFetch<T>(
+async function getResponse<T>(response: Response, type: string) {
+  // Parse response based on requested type
+  if (type == "text") {
+    return (await response.text()) as unknown as T;
+  }
+  if (type == "blob") {
+    return (await response.blob()) as unknown as T;
+  }
+
+  // Default to JSON parsing
+  return (await response.json()) as T;
+}
+
+export function myFetch<T>(
   url: string,
-  options: RequestInit & {
+  options: Omit<RequestInit, "body"> & {
     json?: boolean;
     text?: boolean;
     blob?: boolean;
+    body?: any;
+    immidiate?: boolean;
   } = {}
-) {
-  const data = ref<T>();
-  const error = ref();
-  const isFetching = ref(true);
-  const response = ref<Response>();
+): Promise<T> {
+  url = `${baseUrl}${url}`;
 
   // Prepare headers
   const headers = (options.headers ?? {}) as Record<string, any>;
+  if (!headers["content-type"]) {
+    headers["content-type"] = "application/json";
+    if (options.body) {
+      options.body = JSON.stringify(options.body);
+    }
+  }
   let accessToken = localStorage.getItem("accessToken");
 
   if (accessToken && !url.includes("signup")) {
     headers["Authorization"] = `Bearer ${accessToken}`;
   }
 
-  fetch(url, { ...options, headers })
-    .then(async (res) => {
-      response.value = res;
+  const getResp = async (res: Response): Promise<T> => {
+    // Parse response based on requested type
+    if (options.text) {
+      return await getResponse(res, "text");
+    }
+    if (options.blob) {
+      return await getResponse(res, "blob");
+    }
+    return await getResponse(res, "json");
+  };
 
-      if (!res.ok) {
-        // Handle HTTP errors
-        if (res.status === 403) {
-          if (!isRefreshing) {
-            isRefreshing = true; // Set the flag to indicate a refresh is in progress
+  return new Promise((resolve, reject) => {
+    fetch(url, { ...options, headers })
+      .then(async (res) => {
+        if (!res.ok) {
+          // Handle HTTP errors
+          if (res.status === 403) {
+            if (!shouldRefresh) return res;
+
+            // if refresh errors it means refresh token also gone bad
+            shouldRefresh = false;
 
             try {
               await setNewToken(); // Attempt to refresh the token
-              let accessToken = localStorage.getItem("accessToken");
-            } catch (error) {
-              throw new Error("Failed to refresh token");
-            } finally {
-              isRefreshing = false; // Reset the flag after refreshing
+              accessToken = localStorage.getItem("accessToken");
+            } catch (e) {
+              // error.value = "cant refresh token";
+              reject("can't refresh data xo xo");
             }
-          }
 
-          // Wait for the new token and retry the original request
-          return new Promise(async (resolve) => {
             headers["Authorization"] = `Bearer ${accessToken}`;
             const retryResponse = await fetch(url, { ...options, headers });
-            response.value = retryResponse;
+            // response.value = retryResponse;
 
             if (!retryResponse.ok) {
-              throw new Error(`HTTP error! Status: ${retryResponse.status}`);
+              reject(`HTTP error! Status: ${retryResponse.status}`);
             }
 
-            data.value = (await retryResponse.json()) as T; // Parse JSON data
-            resolve(data.value);
-          });
+            resolve((await getResp(res)) as T);
+          }
         }
-        throw new Error(`HTTP error! Status: ${res.status}`);
-      }
+        resolve(await getResp(res)) as T;
+      })
+      .catch((e) => {
+        reject(e ?? "cant fetch your data");
+      });
+  });
+}
 
-      // Parse response based on requested type
-      if (options.text) {
-        data.value = (await res.text()) as unknown as T;
-        return;
-      }
-      if (options.blob) {
-        data.value = (await res.blob()) as unknown as T;
-        return;
-      }
+export function useFetch<T>(
+  url: string,
+  options: Omit<RequestInit, "body"> & {
+    json?: boolean;
+    text?: boolean;
+    blob?: boolean;
+    body?: any;
+    immidiate?: boolean;
+  } = {}
+) {
+  const data = ref<T>();
+  const error = ref(false);
+  const isFetching = ref(true);
 
-      // Default to JSON parsing
-      data.value = (await res.json()) as T;
+  isFetching.value = true;
+  myFetch(url, options)
+    .then((r) => {
+      data.value = r as T;
     })
-    .catch((err) => {
-      error.value = err;
+    .catch((e) => {
+      error.value = e;
     })
     .finally(() => {
       isFetching.value = false;
@@ -122,6 +158,5 @@ export function useFetch<T>(
     data,
     error,
     isFetching,
-    response,
   };
 }
