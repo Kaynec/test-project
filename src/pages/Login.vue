@@ -1,6 +1,6 @@
 <template>
   <main class="flex items-center">
-    <Card>
+    <Card class="w-96">
       <span class="font-bold text-2xl">خوش آمدید</span>
 
       <p class="text-primary-text">
@@ -57,6 +57,8 @@ import {
   EyeIcon,
   EyeSlashIcon,
 } from "@heroicons/vue/24/outline";
+import { notify } from "notiwind";
+import { PATHS } from "@/constants";
 
 const store = useGlobalState();
 
@@ -95,23 +97,25 @@ async function signup() {
   isLoading.value = true;
 
   try {
-    const data = await myFetch<SignupResponseBody>("/main/main/signup", {
+    const data = await myFetch<SignupResponseBody>(PATHS.LOGIN, {
       method: "post",
       body: body.value,
     });
 
-    if (!data?.ok || !data.data.access) return;
     store.setAccessToken(data.data?.access);
     store.setRefreshToken(data.data?.refresh);
   } catch (error) {
-    const e = error as any;
-
+    // here since api is not giving me much info on the error i just assume this is the case ,
+    // might be more wise to just say error happend
+    notify({
+      group: "all",
+      variant: "failure",
+      title: "عملیات با موفقیت انجام نشد",
+      text: "نام کاربری یا رمز عبور اشتباه است !",
+    });
+    return;
+  } finally {
     isLoading.value = false;
-
-    if (e) {
-      errors.value.email = e;
-      return;
-    }
   }
 
   router.replace("/");

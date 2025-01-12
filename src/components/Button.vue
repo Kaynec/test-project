@@ -19,6 +19,8 @@ function generateVariantClasses() {
   switch (variant) {
     case "simple":
       return "text-secondary";
+    case "transparent":
+      return "transition-all duration-300 hover:bg-gray-100";
 
     default:
       return "bg-primary text-white font-bold";

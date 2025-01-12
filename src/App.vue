@@ -2,7 +2,7 @@
   <div
     class="layout w-full min-h-[100svh] bg-background mx-auto p-8 flex justify-center"
   >
-    <NotificationGroup group="foo">
+    <NotificationGroup group="all">
       <div
         class="z-50 fixed inset-0 flex items-start justify-start p-6 px-4 py-6 pointer-events-none"
       >
@@ -25,7 +25,7 @@
             >
               <div
                 class="flex items-center justify-center w-12"
-                :class="getNotifStyle(notification.variant, 'bg')"
+                :class="getNotifBg(notification.variant)"
               >
                 <svg
                   class="w-6 h-6 text-white fill-current"
@@ -42,7 +42,7 @@
                 <div class="mx-3">
                   <span
                     class="font-semibold"
-                    :class="getNotifStyle(notification.variant, 'text')"
+                    :class="getNotifText(notification.variant)"
                     >{{ notification.title }}</span
                   >
                   <p class="text-sm text-gray-600">{{ notification.text }}</p>
@@ -62,14 +62,24 @@
 </template>
 
 <script setup lang="ts">
-function getNotifStyle(type: string, styleType: string) {
+function getNotifBg(type: string) {
   switch (type) {
     case "success":
-      return `${styleType}-green-500`;
+      return `bg-green-500`;
     case "failure":
-      return `${styleType}-red-500`;
+      return `bg-red-500`;
     default:
-      return `${styleType}-orange-500`;
+      return `bg-orange-500`;
+  }
+}
+function getNotifText(type: string) {
+  switch (type) {
+    case "success":
+      return `text-green-500`;
+    case "failure":
+      return `text-red-500`;
+    default:
+      return `text-orange-500`;
   }
 }
 </script>

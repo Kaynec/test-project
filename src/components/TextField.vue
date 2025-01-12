@@ -1,7 +1,7 @@
 <template>
-  <div class="relative">
+  <div class="relative mt-2">
     <label :class="{ invisible: !label }" class="mt-4 h-12 w-24">
-      {{ label ? label : "placeholderlabel" }}
+      {{ label }}
     </label>
     <div class="relative">
       <div @click="" class="absolute top-1/2 -translate-y-1/2 left-0 pl-2">
@@ -16,10 +16,11 @@
         :value="text"
         @input="handleInput"
         v-bind="$attrs"
+        class="disabled:bg-slate-200"
       ></component>
     </div>
-    <p v-if="error" class="py-2 text-xs font-bold text-red-600">
-      {{ error }}
+    <p class="py-2 text-xs font-bold text-red-600">
+      {{ error ? error : "" }}
     </p>
   </div>
 </template>

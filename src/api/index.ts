@@ -1,4 +1,6 @@
-import { ref } from "vue";
+import { PATHS } from "@/constants";
+import { notify } from "notiwind";
+import { MaybeRef, ref, unref, watch } from "vue";
 
 const baseUrl = "https://interview.cetri.ir";
 
@@ -18,7 +20,7 @@ export async function setNewToken(): Promise<string> {
     // Use the custom useFetch to refresh the token
     try {
       const res = await fetch(
-        `${baseUrl}/main/main/refresh?token=${refreshToken}`,
+        `${baseUrl}${PATHS.REFRESH_TOKEN}?token=${refreshToken}`,
         {
           method: "POST",
         }
@@ -31,10 +33,19 @@ export async function setNewToken(): Promise<string> {
       console.error("Error refreshing token:", error);
 
       // If refreshing fails, clear tokens and redirect to login
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      // window.location.href = "/login";
+      notify({
+        group: "all",
+        variant: "failure",
+        title: "خطایی رخ داد",
+        text: "توکن رفرش شما منقضی شده است",
+      });
       reject("Unable to get a new token");
+      // remove the tokens and redirect to login
+      setTimeout(() => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/login";
+      }, 2500);
       return;
     }
   });
@@ -93,34 +104,41 @@ export function myFetch<T>(
   return new Promise((resolve, reject) => {
     fetch(url, { ...options, headers })
       .then(async (res) => {
+        console.log(res.ok);
         if (!res.ok) {
+          console.log(res.status);
+
           // Handle HTTP errors
           if (res.status === 403) {
-            if (!shouldRefresh) return res;
-
-            // if refresh errors it means refresh token also gone bad
-            shouldRefresh = false;
-
             try {
-              await setNewToken(); // Attempt to refresh the token
-              accessToken = localStorage.getItem("accessToken");
+              if (shouldRefresh) {
+                await setNewToken(); // Attempt to refresh the token
+              }
             } catch (e) {
               // error.value = "cant refresh token";
               reject("can't refresh data xo xo");
             }
+            try {
+              // if refresh errors it means refresh token also gone bad
+              shouldRefresh = false;
+              accessToken = localStorage.getItem("accessToken");
+              headers["Authorization"] = `Bearer ${accessToken}`;
+              const retryResponse = await fetch(url, { ...options, headers });
 
-            headers["Authorization"] = `Bearer ${accessToken}`;
-            const retryResponse = await fetch(url, { ...options, headers });
-            // response.value = retryResponse;
+              if (!retryResponse.ok) {
+                reject(`HTTP error! Status: ${retryResponse.status}`);
+              }
 
-            if (!retryResponse.ok) {
-              reject(`HTTP error! Status: ${retryResponse.status}`);
+              resolve((await getResp(retryResponse)) as T);
+            } catch (error) {
+              reject("Can't Retry Your Response , Error accoring");
             }
-
-            resolve((await getResp(res)) as T);
+          } else {
+            reject(res ?? "cant fetch your data");
           }
+        } else {
+          resolve(await getResp(res)) as T;
         }
-        resolve(await getResp(res)) as T;
       })
       .catch((e) => {
         reject(e ?? "cant fetch your data");
@@ -129,7 +147,7 @@ export function myFetch<T>(
 }
 
 export function useFetch<T>(
-  url: string,
+  url: MaybeRef<string>,
   options: Omit<RequestInit, "body"> & {
     json?: boolean;
     text?: boolean;
@@ -140,23 +158,43 @@ export function useFetch<T>(
 ) {
   const data = ref<T>();
   const error = ref(false);
-  const isFetching = ref(true);
+  const isFetching = ref(false);
 
-  isFetching.value = true;
-  myFetch(url, options)
-    .then((r) => {
-      data.value = r as T;
-    })
-    .catch((e) => {
-      error.value = e;
-    })
-    .finally(() => {
-      isFetching.value = false;
-    });
+  const fetchData = () => {
+    isFetching.value = true;
+    error.value = false;
+    let unwrapUrl = unref(url);
+    data.value = [] as T;
+
+    myFetch(unwrapUrl, options)
+      .then((r) => {
+        data.value = r as T;
+      })
+      .catch((e) => {
+        error.value = e;
+      })
+      .finally(() => {
+        isFetching.value = false;
+      });
+  };
+
+  // Fetch immediately if `immidiate` is true
+  if (options.immidiate !== false) {
+    fetchData();
+  }
+
+  // Watch for changes in the URL and re-fetch
+  watch(
+    () => unref(url),
+    () => {
+      fetchData();
+    }
+  );
 
   return {
     data,
     error,
     isFetching,
+    refetch: fetchData, // Allow manual re-fetching
   };
 }

@@ -2,27 +2,37 @@
   <div class="space-y-4">
     <Card :key="idx" v-for="(column, idx) in form.sections">
       <div class="flex gap-4 items-center justify-between">
-        <div class="flex gap-4 flex-1">
-          <TextField
-            class="flex-1"
-            :error="formErrors.sections[idx].title"
-            v-model="column.title"
-            placeholder="عنوان پرسش"
+        <div class="flex flex-col lg:flex-row justify-start gap-4 flex-1">
+          <div class="flex gap-4 flex-1">
+            <TextField
+              class="flex-1"
+              :error="formErrors.sections[idx].title"
+              v-model="column.title"
+              placeholder="عنوان پرسش"
+            >
+            </TextField>
+            <SelectField
+              class="flex-1"
+              :error="formErrors.sections[idx].type"
+              v-model="column.type"
+              :options="questionTypeOptions"
+              placeholder="انتخاب کنید"
+            >
+            </SelectField>
+          </div>
+          <div
+            class="flex flex-1 w-full lg:w-auto gap-2 lg:justify-end self-center"
           >
-          </TextField>
-          <SelectField
-            class="flex-1"
-            :error="formErrors.sections[idx].type"
-            v-model="column.type"
-            :options="questionTypeOptions"
-            label="دسته بندی"
-            placeholder="انتخاب کنید"
-          >
-          </SelectField>
-          <div class="flex gap-4 flex-1 self-center justify-end">
+            <Button variant="transparent" @click="removeSection(idx)">
+              <TrashIcon class="size-6" />
+            </Button>
+            <Button variant="transparent" @click="copySection(idx)">
+              <ClipboardIcon class="size-6" />
+            </Button>
+            <SwitchToggle v-model="form.sections[idx].required" />
             <Button
-              variant="simple"
-              :class="{ 'border-2 border-gray-200 border-solid': idx == 0 }"
+              variant="transparent"
+              :class="{ 'bg-gray-100 rounded-lg': idx == 0 }"
               :disabled="idx == 0"
               @click="moveUp(idx)"
             >
@@ -30,11 +40,10 @@
             </Button>
             <Button
               :class="{
-                'border-2 border-gray-200 border-solid':
-                  idx >= form.sections.length - 1,
+                'bg-gray-100 rounded-lg': idx >= form.sections.length - 1,
               }"
               :disabled="idx >= form.sections.length - 1"
-              variant="simple"
+              variant="transparent"
               @click="moveDown(idx)"
             >
               <ArrowDownIcon class="size-6" />
@@ -49,8 +58,9 @@
         >
           <TextField
             class="flex-1"
-            :error="formErrors.description"
-            v-model="form.description"
+            :error="''"
+            :modelValue="''"
+            disabled
             :inputType="column.type == 'text' ? 'input' : 'textarea'"
             rows="7"
             label="توضیحات فرم"
@@ -100,7 +110,7 @@
               v-model="form.sections[idx].properties![index]"
             />
 
-            <Button variant="simple">
+            <Button variant="simple" @click="removeProperty(idx, index)">
               <XMarkIcon class="size-6" />
             </Button>
           </div>
@@ -128,8 +138,11 @@ import {
 } from "@heroicons/vue/24/solid";
 import Card from "../Card.vue";
 import Button from "../Button.vue";
+import SwitchToggle from "../SwitchToggle.vue";
+import { TrashIcon, ClipboardIcon } from "@heroicons/vue/24/outline";
 
 const form = defineModel<SubmitFormRequestBody>({ required: true });
+
 const formErrors = defineModel<FormError>("formErrors", { required: true });
 const questionTypeOptions = [
   { label: "پاسخ کوتاه", value: "text" },
@@ -177,5 +190,19 @@ function moveDown(index: number) {
 
   // Update the sections in the reactive state (if using Vue)
   form.value.sections = [...sections];
+}
+
+function removeProperty(sectionIndex: number, propertyIndex: number) {
+  form.value.sections[sectionIndex].properties?.splice(propertyIndex, 1);
+}
+
+function removeSection(index: number) {
+  form.value.sections.splice(index, 1);
+  formErrors.value.sections.splice(index, 1);
+}
+
+function copySection(index: number) {
+  form.value.sections.push(form.value.sections[index]);
+  formErrors.value.sections.push(formErrors.value.sections[index]);
 }
 </script>

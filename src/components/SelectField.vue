@@ -1,5 +1,6 @@
 <template>
-  <div class="relative">
+  <!-- Margin for ofsetting the error height -->
+  <div class="relative mt-2">
     <label class="">
       {{ label }}
     </label>
@@ -11,7 +12,7 @@
         <slot name="prepend"></slot>
       </div>
       <select
-        class="select-with-arrow block p-3 px-8 w-full border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-blue-500 appearance-none"
+        class="select-with-arrow disabled:bg-slate-200 block p-3 px-8 w-full border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-blue-500 appearance-none"
         v-model="selected"
         v-bind="$attrs"
         @change="error = ''"
@@ -26,8 +27,8 @@
         </option>
       </select>
     </div>
-    <p v-if="error" class="py-2 text-xs font-bold text-red-600">
-      {{ error }}
+    <p class="py-2 text-xs font-bold text-red-600">
+      {{ error ? error : "" }}
     </p>
   </div>
 </template>

@@ -18,20 +18,12 @@ export type RefreshRequestBody = undefined; // No request body
 
 export type RefreshResponseBody = string; // Based on the Swagger spec
 
-// Form
-
-export type Section = {
-  title: string;
-  type: string;
-  required: boolean;
-  properties?: any[];
-};
-
-export type SubmitFormRequestBody = {
-  form_type: "public" | "private" | "choose";
-  form_title: string;
-  description: string;
-  sections: Section[];
+export type SubmitFormRequestBody = Omit<
+  DataEntity,
+  "form_id" | "created_at"
+> & {
+  form_id?: string;
+  sections: SectionsEntity[];
 };
 
 export type SubmitFormResponseBody = string; // Based on the Swagger spec
@@ -77,3 +69,38 @@ export type FormError = {
   form_type: string;
   sections: SectionError[];
 };
+
+export type FormModifyResponse = {
+  data: Record<string, any>;
+  status: number;
+  ok: string;
+}; // Based on the Swagger spec
+
+export interface FormListApiResponse {
+  ok: boolean;
+  status: number;
+  data: Data;
+}
+export interface FormApiResponse {
+  ok: boolean;
+  status: number;
+  data: DataEntity;
+}
+export interface Data {
+  totla_quantity: number;
+  data?: DataEntity[] | null;
+}
+export interface DataEntity {
+  form_id: string;
+  form_type: string;
+  form_title: string;
+  description: string;
+  sections?: SectionsEntity[] | null;
+  created_at: number;
+}
+export interface SectionsEntity {
+  title: string;
+  type: string;
+  required: boolean;
+  properties?: (string | null)[] | null;
+}
