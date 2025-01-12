@@ -9,7 +9,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@formkit/auto-animate": "^0.8.2",
     "@heroicons/vue": "^2.2.0",
     "notiwind": "^2.1.0",
     "vue": "latest"
