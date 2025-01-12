@@ -1,5 +1,10 @@
-# Vue 3 + TypeScript + Vite
+تشکر بابت دعوت برای انجام تسک
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+برای اجرای پروژه
+npm install
+npm run dev
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+به نظرم بازم جای کار زیاد داره ولی به دلیل نبود تایم مجبور میشم به همین قانع باشم
+گذاشتم retry برای هنگام خطا یدونه
+شاید توی پروژه جدی تر نیاز باشه چند بار تکرار بشه درخواست ولی بنظرم برای همچین مثالی اوکی هست
+توکن رفرش هم زیر 5 دقیقه expire میشد :)
